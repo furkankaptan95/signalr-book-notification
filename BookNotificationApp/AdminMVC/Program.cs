@@ -1,8 +1,22 @@
+﻿using Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins("https://localhost:7156") // ❗ Diğer MVC'nin adresini buraya yazın!
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials(); // SignalR için gerekli
+    });
+});
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -17,9 +31,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseCors();
 app.UseAuthorization();
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
